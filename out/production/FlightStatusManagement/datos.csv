@@ -1,0 +1,5 @@
+Quarter,Month,DayofMonth,DayOfWeek,FlightDate,DOT_ID_Marketing_Airline,OriginAirportID,OriginState,OriginCityName,DestAirportID,DestState,DestCityName,DepTime,DepDelayMinutes,DepDelay,ArrDelay,Cancelled,AirTime,Distance,ArrDel15,DepDel15
+1,January,5,Wednesday,2023-01-05,AA123,1234,TX,Austin,5678,CA,Los Angeles,0800,15,10,5,false,180,1200,true,false
+2,February,14,Monday,2023-02-14,UA456,5678,CA,Los Angeles,1234,TX,Austin,1200,30,25,20,false,240,1500,false,true
+3,March,22,Tuesday,2023-03-22,DL789,9999,NY,New York,8888,FL,Miami,1000,0,0,0,true,120,1000,true,true
+4,July,1,Thursday,2023-07-01,B6ABC,4444,FL,Miami,3333,CA,San Francisco,1500,60,55,50,false,360,3000,false,false
