@@ -9,7 +9,7 @@ public class Lector {
     static public List<Object[]> leerArchivoCSV(String archivo) {
 
         List<Object[]> datos = new ArrayList<>();
-
+        
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = br.readLine()) != null) {

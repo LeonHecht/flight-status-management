@@ -7,7 +7,7 @@ public class TextTyper {
         try {
             for (int i = 0; i < text.length(); i++) {
                 System.out.printf("%c", text.charAt(i));
-                System.out.flush(); // Flush the output stream to ensure immediate display
+                // System.out.flush(); // Flush the output stream to ensure immediate display
                 Thread.sleep(delay);
             }
             System.out.println(); // Move to the next line after typing the entire text
