@@ -5,7 +5,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Clase para escribir contenido en un archivo de texto.
+ */
 public class EscritorArchivoTXT {
+
+    /**
+     * Escribe o sobrescribe un archivo de texto con el contenido proporcionado.
+     *
+     * @param nombreArchivo Nombre del archivo de texto a escribir/sobrescribir.
+     * @param contenido Contenido a escribir en el archivo.
+     */
     public void escribirEnArchivo(String nombreArchivo, String contenido) {
         try {
             File archivo = new File(nombreArchivo);
@@ -35,10 +45,11 @@ public class EscritorArchivoTXT {
 
         // Datos de prueba
         ArrayList<Double> testData = new ArrayList<>(Arrays.asList(20.0, 3.0, 5.0, 7.0, 5.0, 10.0));
-        MetricasEstadisticas metricas = new MetricasEstadisticas(testData);
 
-        String texto = ContenidoTXT.Contenido(metricas);
+        // Contenido del txt
+        String texto = ContenidoTXT.Contenido(testData);
         
+        // Título del txt
         String titulo_0 = "Columna";
         String titulo = String.format("Mérticas de %s.txt", titulo_0);
 

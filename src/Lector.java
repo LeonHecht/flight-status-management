@@ -4,16 +4,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase que proporciona métodos para leer un archivo CSV y convertir los datos en una lista de arreglos de objetos.
+ */
 public class Lector {
 
+    /**
+     * Lee un archivo CSV y devuelve los datos en una lista de arreglos de objetos.
+     *
+     * @param archivo Nombre o ruta del archivo CSV a leer.
+     * @return Una lista de arreglos de objetos que representan los datos del archivo CSV.
+     *         Cada arreglo contiene los valores de una fila del archivo.
+     */
     static public List<Object[]> leerArchivoCSV(String archivo) {
 
         List<Object[]> datos = new ArrayList<>();
-        
+
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = br.readLine()) != null) {
-                String[] valores = linea.split(","); // Puedes ajustar el delimitador según tu archivo
+                String[] valores = linea.split(","); // Delimitador de archivo csv
                 Object[] fila = new Object[valores.length];
 
                 for (int i = 0; i < valores.length; i++) {
