@@ -9,12 +9,11 @@ import java.util.Set;
 public class MetricasEstadisticasTest {
 
     private MetricasEstadisticas metricas;
-    private ArrayList<Double> testData;
 
     @Before
     public void setUp() {
         // Datos de prueba
-        testData = new ArrayList<>(Arrays.asList(2.0, 3.0, 5.0, 7.0, 5.0, 10.0));
+        ArrayList<Double> testData = new ArrayList<>(Arrays.asList(2.0, 3.0, 5.0, 7.0, 5.0, 10.0));
         metricas = new MetricasEstadisticas(testData);
     }
 
