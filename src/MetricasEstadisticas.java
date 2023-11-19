@@ -1,6 +1,6 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+// import java.io.BufferedReader;
+// import java.io.FileReader;
+// import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,10 +38,10 @@ public class MetricasEstadisticas {
         for (int i = 0; i < datos.size(); i++) {
             conteos.add(Collections.frequency(datos, datos.get(i)));
         }
-    
+
         // Encontramos el máximo conteo
         int maxConteo = Collections.max(conteos);
-    
+
         // Creamos un ArrayList para almacenar las modas
         ArrayList<Double> modas = new ArrayList<>();
         for (int i = 0; i < datos.size(); i++) {
@@ -49,10 +49,10 @@ public class MetricasEstadisticas {
                 modas.add(datos.get(i));
             }
         }
-    
+
         // Si hay múltiples modas con el mismo conteo, devolvemos el ArrayList de modas
         // Si solo hay una moda, devolvemos un ArrayList con un solo elemento
-        if (modas.size() >= 1) {
+        if (!modas.isEmpty()) {
             return modas;
         }
         else{
@@ -65,40 +65,40 @@ public class MetricasEstadisticas {
     public double DesviacionEstandar() {
         // Calcular la media
         double media = Media();
-    
+
         // Calcular la suma de los cuadrados de las diferencias entre cada valor y la media
         double sumaCuadradosDiferencias = 0;
         for (double valor : datos) {
             sumaCuadradosDiferencias += Math.pow(valor - media, 2);
         }
-    
+
         // Calcular la varianza
         double varianza = sumaCuadradosDiferencias / datos.size();
-    
+
         // La desviación estándar es la raíz cuadrada de la varianza
         return Math.sqrt(varianza);
     }
-    
+
     // Para obtener el Mínimo
     public double Minimo() {
         return Collections.min(datos);
     }
-    
+
     // Para obtener el Máximo
     public double Maximo() {
         return Collections.max(datos);
     }
-    
+
     // Para obtener el número de datos en la columna
     public int Recuento() {
         return datos.size();
     }
-    
+
     // Para obtener el rango
     public double Rango() {
         return Maximo() - Minimo();
     }
-    
+
 
     // Para calcular los cuartiles
     public double[] Cuartiles() {
@@ -121,8 +121,8 @@ public class MetricasEstadisticas {
 
         return cuartiles;
     }
-    
-    
+
+
     // Para obtener los valores únicos
     public Set<Double> ValoresUnicos() {
         return new HashSet<>(datos);
