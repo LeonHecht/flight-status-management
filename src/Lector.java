@@ -23,7 +23,7 @@ public class Lector {
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = br.readLine()) != null) {
-                String[] valores = linea.split(","); // Puedes ajustar el delimitador según tu archivo
+                String[] valores = linea.split(","); // Delimitador de archivo csv
                 Object[] fila = new Object[valores.length];
 
                 for (int i = 0; i < valores.length; i++) {
