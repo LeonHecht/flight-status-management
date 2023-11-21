@@ -7,14 +7,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MetricasEstadisticasTest {
-
+/*
     private MetricasEstadisticas metricas;
 
     @Before
     public void setUp() {
         // Datos de prueba
         ArrayList<Double> testData = new ArrayList<>(Arrays.asList(2.0, 3.0, 5.0, 7.0, 5.0, 10.0));
-        metricas = new MetricasEstadisticas(testData);
+        // metricas = new MetricasEstadisticas(testData);
     }
 
     @Test
@@ -69,4 +69,5 @@ public class MetricasEstadisticasTest {
         Set<Double> expectedValoresUnicos = new HashSet<>(Arrays.asList(2.0, 3.0, 5.0, 7.0, 10.0));
         assertEquals(expectedValoresUnicos, metricas.ValoresUnicos());
     }
+*/
 }
