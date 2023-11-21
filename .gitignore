@@ -30,3 +30,6 @@ replay_pid*
 
 # iml files
 *.iml
+
+# .csv files
+*.csv
