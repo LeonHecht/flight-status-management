@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class Filtrador {
         filteredData.add(datos.get(0));
 
         for (Object[] row : datos) {
-            if (row[columnIndex] instanceof Boolean && row[columnIndex].equals(bool)) {
+            if (row.length > columnIndex && row[columnIndex] instanceof Boolean && row[columnIndex].equals(bool)) {
                 filteredData.add(row);
             }
         }
@@ -81,7 +82,7 @@ public class Filtrador {
         filteredData.add(datos.get(0));
 
         for (Object[] row : datos) {
-            if (row[columnIndex] instanceof Integer) {
+            if (row.length > columnIndex && row[columnIndex] instanceof Integer) {
                 int value = (int) row[columnIndex];
                 if (value >= min && value <= max) {
                     filteredData.add(row);
@@ -108,7 +109,7 @@ public class Filtrador {
         filteredData.add(datos.get(0));
 
         for (Object[] row : datos) {
-            if (row[columnIndex] instanceof Double) {
+            if (row.length > columnIndex && row[columnIndex] instanceof Double) {
                 double value = (double) row[columnIndex];
                 if (value >= min && value <= max) {
                     filteredData.add(row);
@@ -133,7 +134,8 @@ public class Filtrador {
         filteredData.add(datos.get(0));
 
         for (Object[] row : datos) {
-            if (row[columnIndex] instanceof String) {
+            System.out.println("row: " + Arrays.toString(row));
+            if (row.length > columnIndex && row[columnIndex] instanceof String) {
                 String value = (String) row[columnIndex];
                 for (String filterValue : filter) {
                     if (value.equals(filterValue)) {
@@ -144,6 +146,33 @@ public class Filtrador {
             }
         }
         return filteredData;
+    }
+
+    public static List<Object[]> filtrar(List<Object[]> datos, String columna, String filtro) {
+        try {
+            datos = applicaFiltroBooleano(datos, columna, Boolean.valueOf(filtro));
+        } catch (InputMismatchException e) {
+            try {
+                String[] min_max = filtro.split(" ");
+                datos = Filtrador.applicaFiltroDouble(datos, columna,
+                        Double.parseDouble(min_max[0]), Double.parseDouble(min_max[1]));
+            } catch (InputMismatchException e2) {
+                try {
+                    String[] min_max = filtro.split(" ");
+                    datos = Filtrador.applicaFiltroInt(datos, columna,
+                            Integer.parseInt(min_max[0]), Integer.parseInt(min_max[1]));
+                } catch (InputMismatchException e3) {
+                    try {
+                        String[] filter = filtro.split(" ");
+                        datos = Filtrador.applicaFiltroString(datos, columna, filter);
+                    } catch (InputMismatchException e4) {
+                        return datos;
+                    }
+                }
+            }
+        }
+        return datos;
+
     }
 
 }
