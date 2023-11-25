@@ -1,5 +1,6 @@
 import utilities.*;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -21,70 +22,114 @@ public class App {
     List<Object[]> datos;
 
     String archivo = "Data/airlines_project_short.csv";
+    // String archivo = "Data/modified_file.csv";
 
     public App() {
-        this.setDatos();
+        // this.setDatos();
     }
 
-    private void setDatos() {
+    private void readDatosSecuencial() {
+        // The next line is only for sequential
         this.datos = Lector.leerArchivoCSV(this.archivo);
-        // int columnNumber = ColumnNumberFinder.getColumnNumber(this.datos, "OriginCityName");
-        // System.out.println(this.datos.get(0)[columnNumber]);
-        // int columnNumber2 = ColumnNumberFinder.getColumnNumber(this.datos, "DestCityName");
-        // System.out.println(this.datos.get(0)[columnNumber2]);
-        // this.datos = CityDataProcessor.removeCommaAndSubstring(this.datos, columnNumber, columnNumber2);
+
     }
 
-    public void run() {
+    public void run() throws Exception {
         // print welcome message
         this.printWelcome();
 
-        // Get user choice whether to enter comparison-mode or query mode
-        String choice;
-        while (true) {
-            try {
-                choice = this.getChoice();
-                this.printChoiceConfirm(choice);
-                if (choice.equals("f")) {
-                    // User chose to filter data
-                    try {
-                        // get column
-                        String column = this.getColumnToFilter();
-                        // apply filter to column
-                        boolean result = this.aplicarFiltro(column);
-                        if (!result) {
-                            System.out.println("No fue posible aplicar este filtro a los datos. Intenta de nuevo");
-                        }
-                    } catch (InputMismatchException e) {
-                        System.out.println("La entrada no está en la lista de nombres de columnas." +
-                                "Intenta de nuevo.");
+        String seqOrConcurrent = this.getSeqOrConcurrent();
+        if (seqOrConcurrent.equals("n")) {
+            this.readDatosSecuencial();
+            // Get user choice whether to enter comparison-mode or query mode
+            String choice;
+            while (true) {
+                try {
+                    choice = this.getChoice();
+                    this.printChoiceConfirm(choice);
+                    if (choice.equals("f")) {
+                        // User chose to filter data
+                        this.handleFilter();
+                    } else if (choice.equals("m")) {
+                        // user chose to get metrics
+                        this.handleMetrics();
+                    } else if (choice.equals("s")) {
+                        // user chose to quit app
+                        // stop method run -> quit the app
+                        return;
                     }
-                } else if (choice.equals("m")) {
-                    // user chose to get metrics
-                    System.out.println("Aquí están las métricas solicitadas:");
-                    String columna = this.getColumnForMetrics();
-                    int columnNumber = ColumnNumberFinder.getColumnNumber(this.datos, columna);
-                    // System.out.println("column: " + columnNumber);
-                    // System.out.println("Datos: " + this.datos);
-                    List<List<Object>> transposed_datos = DataConverter.transpose(this.datos);
-                    // System.out.println("Transposed datos: " + transposed_datos);
-                    List<Object> datos = transposed_datos.get(columnNumber);
-                    // System.out.println(datos);
-                    ArrayList<Double> datosDouble = ObjectToListConversion.convertListToDoubleArrayList(datos);
-                    // System.out.println(datosDouble);
-                    String texto = ContenidoTXT.Contenido(datosDouble);
-                    String titulo = "Mérticas de " + columna + ".txt";
-                    EscritorArchivoTXT escritor = new EscritorArchivoTXT();
-                    escritor.escribirEnArchivo(titulo, texto);
-                } else if (choice.equals("s")) {
-                    // user chose to quit app
-                    // stop method run -> quit the app
-                    return;
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido. Intenta de nuevo.");
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Input inválido. Intenta de nuevo.");
             }
+        } else {
+            // User wants concurrency
+            String columnToFilter = this.getColumnToFilter();
+            String filter = this.getFiltro(columnToFilter);
+
+            int availableCores = Runtime.getRuntime().availableProcessors();
+            System.out.println("Num of cores: " + availableCores);
+            File file = new File(this.archivo);
+            long fileSizeInBytes = file.length();
+            ParallelCSVProcessing p = new ParallelCSVProcessing(file);
+            int chunks = (int) (fileSizeInBytes/availableCores);
+            p.processAll(availableCores, chunks, columnToFilter, filter);
+            return;
         }
+    }
+
+    private String getSeqOrConcurrent() {
+        String toWrite = "Quieres procesar los datos de manera concurrente? Sí (s), No (n)";
+        //TextTyper.typeText(toWrite, this.typeDelay);
+        System.out.println(toWrite);
+        Scanner scanner = new Scanner(System.in);
+        String userInput = scanner.nextLine();
+
+        if (!userInput.equals("s") && !userInput.equals("n")) {
+            throw new InputMismatchException("Input inválido");
+        } else {
+            return userInput;
+        }
+    }
+
+    private void handleFilter() {
+        try {
+            // get column
+            String column = this.getColumnToFilter();
+            // apply filter to column
+            String filtro = this.getFiltro(column);
+            this.datos = Filtrador.filtrar(this.datos, column, filtro);
+            String datosString = CSVProcessor.convertToString(this.datos);
+            List<String> datosStringList = new ArrayList<>();
+            datosStringList.add(datosString);
+            CSVWriter.writeCSVToFile(datosStringList);
+            /*
+            if (!datos) {
+                System.out.println("No fue posible aplicar este filtro a los datos. Intenta de nuevo");
+            }
+             */
+        } catch (InputMismatchException e) {
+            System.out.println("La entrada no está en la lista de nombres de columnas." +
+                    "Intenta de nuevo.");
+        }
+    }
+
+    private void handleMetrics() {
+        System.out.println("Aquí están las métricas solicitadas:");
+        String columna = this.getColumnForMetrics();
+        int columnNumber = ColumnNumberFinder.getColumnNumber(this.datos, columna);
+        // System.out.println("column: " + columnNumber);
+        // System.out.println("Datos: " + this.datos);
+        List<List<Object>> transposed_datos = DataConverter.transpose(this.datos);
+        // System.out.println("Transposed datos: " + transposed_datos);
+        List<Object> datos = transposed_datos.get(columnNumber);
+        // System.out.println(datos);
+        ArrayList<Double> datosDouble = ObjectToListConversion.convertListToDoubleArrayList(datos);
+        // System.out.println(datosDouble);
+        String texto = ContenidoTXT.Contenido(datosDouble);
+        String titulo = "Mérticas de " + columna + ".txt";
+        EscritorArchivoTXT escritor = new EscritorArchivoTXT();
+        escritor.escribirEnArchivo(titulo, texto);
     }
 
     private void printWelcome(){
@@ -127,38 +172,13 @@ public class App {
         }
     }
 
-    private boolean aplicarFiltro(String columna) {
+    private String getFiltro(String columna) {
         String toWrite = "Específica el filtro que quieres aplicar:";
         //TextTyper.typeText(toWrite, this.typeDelay);
         System.out.println(toWrite);
 
         Scanner scanner = new Scanner(System.in);
-
-        String userInput = scanner.nextLine();
-
-        try {
-            this.datos = Filtrador.applicaFiltroBooleano(this.datos, columna, Boolean.valueOf(userInput));
-        } catch (InputMismatchException e) {
-            try {
-                String[] min_max = userInput.split(" ");
-                this.datos = Filtrador.applicaFiltroDouble(this.datos, columna,
-                        Double.parseDouble(min_max[0]), Double.parseDouble(min_max[1]));
-            } catch (InputMismatchException e2) {
-                try {
-                    String[] min_max = userInput.split(" ");
-                    this.datos = Filtrador.applicaFiltroInt(this.datos, columna,
-                            Integer.parseInt(min_max[0]), Integer.parseInt(min_max[1]));
-                } catch (InputMismatchException e3) {
-                    try {
-                        String[] filter = userInput.split(" ");
-                        this.datos = Filtrador.applicaFiltroString(this.datos, columna, filter);
-                    } catch (InputMismatchException e4) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
+        return scanner.nextLine();
     }
 
     private String getChoice() throws InputMismatchException {
