@@ -83,7 +83,7 @@ public class Filtrador {
      * @return Los datos filtrados.
      * @throws InputMismatchException Si la columna no contiene valores booleanos.
      */
-    public static List<Object[]> applicaFiltroBooleano(List<Object[]> datos, String columna, Boolean bool) {
+    public static List<Object[]> applicaFiltroBooleanoOld(List<Object[]> datos, String columna, Boolean bool) {
 
         int columnIndex = getIndiceDeColumna(columna);
 
@@ -111,17 +111,59 @@ public class Filtrador {
         return filteredData;
     }
 
+    public static String applicaFiltroBooleano(String csvData, String columna, Boolean bool) {
+
+        int columnIndex = getIndiceDeColumna(columna);
+
+        String[] lines = csvData.split("\\r?\\n"); // Split by newline
+
+        List<String[]> filteredData = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] row = line.split(",");
+            // check if first row contains the columns
+            if (row[0] == "Quarter") {
+                filteredData.add(row);
+            } else {
+                String cell = (String) row[columnIndex];
+                try {
+                    boolean cellBool = Boolean.parseBoolean(cell.toLowerCase());
+                    if (cellBool == bool) {
+                        filteredData.add(row);
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    throw new InputMismatchException("Not castable to boolean");
+                }
+            }
+        }
+        return convertToString(filteredData);
+    }
+
+    private static String convertToString(List<String[]> filteredData) {
+        StringBuilder result = new StringBuilder();
+
+        for (String[] row : filteredData) {
+            result.append(String.join(",", row)).append("\r\n");
+        }
+
+        return result.toString();
+    }
+
     // Métodos applicaFiltroInt, applicaFiltroDouble, y applicaFiltroString tienen comentarios de uso similar y estructura similar.
     // No se ha incluido comentarios adicionales para evitar redundancia en el texto.
     // El contenido de estos métodos ya está documentado en los comentarios proporcionados anteriormente.
-    public static List<Object[]> applicaFiltroInt(List<Object[]> datos, String columna, int min, int max) {
+    public static String applicaFiltroInt(String csvData, String columna, int min, int max) {
         // Encontrar el índice de la columna especificada en los datos
         int columnIndex = getIndiceDeColumna(columna);
 
-        // Filtrar los datos basados en el rango numérico especificado en la columna
-        List<Object[]> filteredData = new ArrayList<>();
+        String[] lines = csvData.split("\\r?\\n"); // Split by newline
 
-        for (Object[] row : datos) {
+        // Filtrar los datos basados en el rango numérico especificado en la columna
+        List<String[]> filteredData = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] row = line.split(",");
             // check if first row contains the columns
             if (Objects.equals(row[0], "Quarter")) {
                 filteredData.add(row);
@@ -131,31 +173,26 @@ public class Filtrador {
                     if (value >= min && value <= max) {
                         filteredData.add(row);
                     }
-                } catch (Exception e) {
-                    try {
-                        int value = (int) row[columnIndex];
-                        if (value >= min && value <= max) {
-                            filteredData.add(row);
-                        }
-                    } catch (Exception e2) {
+                } catch (Exception e2) {
                         System.out.println(e2.getMessage());
                         throw new InputMismatchException(row[columnIndex] + " Not castable to integer");
                     }
                 }
             }
-        }
-        return filteredData;
+        return convertToString(filteredData);
     }
 
     // Método para filtrar valores double en una columna específica dentro de un rango
-    public static List<Object[]> applicaFiltroDouble(List<Object[]> datos, String columna, double min, double max) {
+    public static String applicaFiltroDouble(String csvData, String columna, double min, double max) {
         // Encontrar el índice de la columna especificada en los datos
         int columnIndex = getIndiceDeColumna(columna);
 
-        // Filtrar los datos basados en el rango de valores double especificado en la columna
-        List<Object[]> filteredData = new ArrayList<>();
+        String[] lines = csvData.split("\\r?\\n"); // Split by newline
 
-        for (Object[] row : datos) {
+        List<String[]> filteredData = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] row = line.split(",");
             // check if first row contains the columns
             if (row[0] == "Quarter") {
                 filteredData.add(row);
@@ -171,17 +208,19 @@ public class Filtrador {
                 }
             }
         }
-        return filteredData;
+        return convertToString(filteredData);
     }
 
-    public static List<Object[]> applicaFiltroString(List<Object[]> datos, String columna, String[] filter) {
+    public static String applicaFiltroString(String csvData, String columna, String[] filter) {
         // Encontrar el índice de la columna especificada en los datos
         int columnIndex = getIndiceDeColumna(columna);
 
-        // Filtrar los datos basados en el conjunto de valores String proporcionados como filtro
-        List<Object[]> filteredData = new ArrayList<>();
+        String[] lines = csvData.split("\\r?\\n"); // Split by newline
 
-        for (Object[] row : datos) {
+        List<String[]> filteredData = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] row = line.split(",");
             // check if first row contains the columns
             if (row[0] == "Quarter") {
                 filteredData.add(row);
@@ -200,10 +239,10 @@ public class Filtrador {
                 }
             }
         }
-        return filteredData;
+        return convertToString(filteredData);
     }
 
-    public static List<Object[]> filtrar(List<Object[]> datos, String columna, String filtro) throws Exception {
+    public static String filtrar(String datos, String columna, String filtro) throws Exception {
 
         String[] min_max = filtro.split(" ");
 
