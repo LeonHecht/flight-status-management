@@ -5,6 +5,24 @@ import java.util.List;
 
 public class CSVProcessor {
 
+    // Convert CSV chunk data (String) to List<Object[]>
+    public static List<Object[]> convertStringToList(String csvData) {
+        List<Object[]> rows = new ArrayList<>();
+        String[] lines = csvData.split(System.lineSeparator());
+        for (String line : lines) {
+            String[] columns = line.split(",");
+
+            Object[] rowData = new Object[columns.length];
+            for (int i = 0; i < columns.length; i++) {
+                rowData[i] = columns[i]; // Trim spaces if needed
+            }
+
+            rows.add(rowData);
+        }
+
+        return rows;
+    }
+
     // Function to process a chunk of CSV data from an input stream
     public static List<Object[]> convertToList(InputStream inputStream) throws IOException {
         List<Object[]> rows = new ArrayList<>();
@@ -24,7 +42,6 @@ public class CSVProcessor {
                 rows.add(rowData); // Add the row to the list
             }
         }
-
         return rows;
     }
 

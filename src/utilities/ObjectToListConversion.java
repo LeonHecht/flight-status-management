@@ -12,17 +12,10 @@ public class ObjectToListConversion {
             if (obj instanceof Number) {
                 doubleArrayList.add(((Number) obj).doubleValue());
             } else if (obj instanceof String) {
-                try {
-                    double value = Double.parseDouble((String) obj);
-                    doubleArrayList.add(value);
-                } catch (NumberFormatException e) {
-                    // Handle if the String cannot be parsed to a Double
-                    // You might want to log an error or handle differently based on your use case
-                }
+                double value = Double.parseDouble((String) obj);
+                doubleArrayList.add(value);
             }
-            // Add more conditions as needed based on the types you expect in the Object list
         }
-
         return doubleArrayList;
     }
 
