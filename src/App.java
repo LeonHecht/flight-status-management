@@ -1,8 +1,6 @@
 import utilities.*;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class App {
@@ -21,7 +19,7 @@ public class App {
 
     List<Object[]> datos;
 
-    String archivo = "Data/airlines_project_short.csv";
+    String archivo = "Data/airlines_project_sin_nulos_ni_comas_short.csv";
     // String archivo = "Data/modified_file.csv";
 
     public App() {
@@ -39,31 +37,37 @@ public class App {
         this.printWelcome();
 
         String seqOrConcurrent = this.getSeqOrConcurrent();
+        // medicion.iniciar();
         if (seqOrConcurrent.equals("n")) {
             this.readDatosSecuencial();
             // Get user choice whether to enter comparison-mode or query mode
             String choice;
             while (true) {
-                try {
-                    choice = this.getChoice();
-                    this.printChoiceConfirm(choice);
-                    if (choice.equals("f")) {
-                        // User chose to filter data
-                        this.handleFilter();
-                    } else if (choice.equals("m")) {
-                        // user chose to get metrics
-                        this.handleMetrics();
-                    } else if (choice.equals("s")) {
-                        // user chose to quit app
-                        // stop method run -> quit the app
-                        return;
-                    }
-                } catch (InputMismatchException e) {
-                    System.out.println("Input inválido. Intenta de nuevo.");
+                // medicion.iniciar();
+                //try {
+                choice = this.getChoice();
+                this.printChoiceConfirm(choice);
+                if (choice.equals("f")) {
+                    // User chose to filter data
+                    this.handleFilter();
+                } else if (choice.equals("m")) {
+                    // user chose to get metrics
+                    this.handleMetrics();
+                } else if (choice.equals("s")) {
+                    // user chose to quit app
+                    // stop method run -> quit the app
+                    return;
                 }
+                //} catch (InputMismatchException e) {
+                //    System.out.println("Input inválido. Intenta de nuevo.");
+                //}
+
+                // medicion.detener();
+                // print(tiempo)
             }
         } else {
             // User wants concurrency
+            // medicion.iniciar();
             String columnToFilter = this.getColumnToFilter();
             String filter = this.getFiltro(columnToFilter);
 
@@ -72,9 +76,10 @@ public class App {
             File file = new File(this.archivo);
             long fileSizeInBytes = file.length();
             ParallelCSVProcessing p = new ParallelCSVProcessing(file);
-            int chunks = (int) (fileSizeInBytes/availableCores);
-            p.processAll(availableCores, chunks, columnToFilter, filter);
-            return;
+            int chunkSize = (int) (fileSizeInBytes / availableCores);
+            p.processAll(availableCores, columnToFilter, filter);
+            // medicion.detener();
+            // print(tiempo);
         }
     }
 
@@ -92,26 +97,28 @@ public class App {
         }
     }
 
-    private void handleFilter() {
-        try {
-            // get column
-            String column = this.getColumnToFilter();
-            // apply filter to column
-            String filtro = this.getFiltro(column);
-            this.datos = Filtrador.filtrar(this.datos, column, filtro);
-            String datosString = CSVProcessor.convertToString(this.datos);
-            List<String> datosStringList = new ArrayList<>();
-            datosStringList.add(datosString);
-            CSVWriter.writeCSVToFile(datosStringList);
-            /*
-            if (!datos) {
-                System.out.println("No fue posible aplicar este filtro a los datos. Intenta de nuevo");
-            }
-             */
-        } catch (InputMismatchException e) {
-            System.out.println("La entrada no está en la lista de nombres de columnas." +
-                    "Intenta de nuevo.");
+    private void handleFilter() throws Exception {
+        //try {
+        // get column
+        String column = this.getColumnToFilter();
+        // apply filter to column
+        String filtro = this.getFiltro(column);
+        this.datos = Filtrador.filtrar(this.datos, column, filtro);
+        String datosString = CSVProcessor.convertToString(this.datos);
+        List<String> datosStringList = new ArrayList<>();
+        datosStringList.add(datosString);
+        CSVWriter.writeCSVToFile(datosStringList);
+        /*
+        if (!datos) {
+            System.out.println("No fue posible aplicar este filtro a los datos. Intenta de nuevo");
         }
+         */
+        //} catch (InputMismatchException e) {
+        //    System.out.println("La entrada no está en la lista de nombres de columnas." +
+        //            "Intenta de nuevo.");
+        //} catch (Exception e) {
+        //    throw new RuntimeException(e);
+        //}
     }
 
     private void handleMetrics() {
