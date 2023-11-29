@@ -19,7 +19,7 @@ public class App {
 
     List<Object[]> datos;
 
-    String archivo = "Data/airlines_project_sin_nulos_ni_comas_short.csv";
+    String archivo = "Data/airlines_project.csv";
     // String archivo = "Data/modified_file.csv";
 
     public App() {
@@ -35,10 +35,11 @@ public class App {
     public void run() throws Exception {
         // print welcome message
         this.printWelcome();
-
+        this.archivo = this.getCSVPath();
         String seqOrConcurrent = this.getSeqOrConcurrent();
         // medicion.iniciar();
         if (seqOrConcurrent.equals("n")) {
+            /*
             this.readDatosSecuencial();
             // Get user choice whether to enter comparison-mode or query mode
             String choice;
@@ -64,7 +65,10 @@ public class App {
 
                 // medicion.detener();
                 // print(tiempo)
+
             }
+             */
+            System.out.println("Nope");
         } else {
             // User wants concurrency
             // medicion.iniciar();
@@ -77,10 +81,24 @@ public class App {
             long fileSizeInBytes = file.length();
             ParallelCSVProcessing p = new ParallelCSVProcessing(file);
             int chunkSize = (int) (fileSizeInBytes / availableCores);
-            p.processAll(availableCores, columnToFilter, filter);
+            String filename = file.getName();
+            // Remove the file extension if present
+            if (filename.contains(".")) {
+                filename = filename.substring(0, filename.lastIndexOf('.'));
+            }
+            p.processAll(availableCores, columnToFilter, filter, filename);
             // medicion.detener();
             // print(tiempo);
         }
+    }
+
+    private String getCSVPath() {
+        String toWrite = "Ingresa la ruta del archivo CSV";
+        //TextTyper.typeText(toWrite, this.typeDelay);
+        System.out.println(toWrite);
+        Scanner scanner = new Scanner(System.in);
+
+        return scanner.nextLine();
     }
 
     private String getSeqOrConcurrent() {
@@ -100,14 +118,21 @@ public class App {
     private void handleFilter() throws Exception {
         //try {
         // get column
+
+        // uncomment following lines
+        /*
         String column = this.getColumnToFilter();
         // apply filter to column
         String filtro = this.getFiltro(column);
-        this.datos = Filtrador.filtrar(this.datos, column, filtro);
+        this.datos = Filtrador.filtrar(String.format(this.datos), column, filtro);
         String datosString = CSVProcessor.convertToString(this.datos);
-        List<String> datosStringList = new ArrayList<>();
-        datosStringList.add(datosString);
-        CSVWriter.writeCSVToFile(datosStringList);
+        File file = new File(this.archivo);
+        String filename = file.getName();
+        // Remove the file extension if present
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf('.'));
+        }
+        CSVWriter.writeCSVToFile(datosString, filename, true);
         /*
         if (!datos) {
             System.out.println("No fue posible aplicar este filtro a los datos. Intenta de nuevo");

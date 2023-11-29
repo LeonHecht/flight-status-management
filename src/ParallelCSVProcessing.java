@@ -12,7 +12,7 @@ public class ParallelCSVProcessing {
         this.file = file;
     }
 
-    public String processPart(long start, long end, String columnToFilter, String filter) throws Exception {
+    public String processPart(String id, long start, long end, String columnToFilter, String filter) throws Exception {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             System.out.println("Computing the part from " + start + " to " + end);
             randomAccessFile.seek(start);
@@ -31,24 +31,27 @@ public class ParallelCSVProcessing {
 
             String chunkData = new String(buffer);
 
-            List<Object[]> datos = CSVProcessor.convertStringToList(chunkData);
+            // List<Object[]> datos = CSVProcessor.convertStringToList(chunkData);
 
             // apply filter
-            datos = Filtrador.filtrar(datos, columnToFilter, filter);
+            chunkData = Filter.filtrar(chunkData, columnToFilter, filter);
             System.out.println("Finished the part from " + start + " to " + end);
-            return CSVProcessor.convertToString(datos);
+            CSVWriter.writeCSVToFileSub(chunkData, "subarchivo_" + id, false);
+            // return CSVProcessor.convertToString(chunkData);
+            return "";
         }
     }
 
-    public Callable<String> processPartTask(final long start, final long end, String columnToFilter, String filter) {
-        return () -> processPart(start, end, columnToFilter, filter);
+    public Callable<String> processPartTask(String id, final long start, final long end, String columnToFilter, String filter) {
+        return () -> processPart(id, start, end, columnToFilter, filter);
     }
 
-    public void processAll(int noOfThreads, String columnToFilter, String filter) throws Exception {
+    public void processAll(int noOfThreads, String columnToFilter, String filter, String fileName) throws Exception {
         long fileSize = file.length();
         List<Callable<String>> tasks = new ArrayList<>(noOfThreads);
         long start = 0;
         long end;
+        List<String> csvFilenames = new ArrayList<>();
 
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             for (int i = 0; i < noOfThreads; i++) {
@@ -63,24 +66,23 @@ public class ParallelCSVProcessing {
                     }
                     end++;
                 }
-
-                tasks.add(processPartTask(start, end, columnToFilter, filter));
+                String threadId = String.valueOf(i+1);
+                tasks.add(processPartTask(threadId, start, end, columnToFilter, filter));
                 start = end;
+                csvFilenames.add("Data/subarchivo_" + threadId + ".csv");
             }
         }
 
         ExecutorService es = Executors.newFixedThreadPool(noOfThreads);
-        List<Future<String>> results = es.invokeAll(tasks);
+        es.invokeAll(tasks);
         es.shutdown();
 
-        // Collect processed CSV data from the results
-        List<String> processedData = new ArrayList<>();
+        CSVWriter.mergeCSVFiles(csvFilenames, "Data/test.csv");
+
+        /*
         for (Future<String> result : results) {
-            processedData.add(result.get());
+            CSVWriter.writeCSVToFile(result.get(), fileName, true);
         }
-
-        // Write all the collected CSV data to a single file
-        CSVWriter.writeCSVToFile(processedData);
+         */
     }
-
 }
