@@ -19,17 +19,11 @@ public class App {
 
     List<Object[]> datos;
 
-    String archivo = "Data/airlines_project.csv";
+    String archivo = "Data/Flight_Status_Prediction_Data.csv";
     // String archivo = "Data/modified_file.csv";
 
     public App() {
         // this.setDatos();
-    }
-
-    private void readDatosSecuencial() {
-        // The next line is only for sequential
-        this.datos = Lector.leerArchivoCSV(this.archivo);
-
     }
 
     public void run() throws Exception {
@@ -37,7 +31,18 @@ public class App {
         this.printWelcome();
         this.archivo = this.getCSVPath();
         String seqOrConcurrent = this.getSeqOrConcurrent();
-        // medicion.iniciar();
+        String columnToFilter = this.getColumnToFilter();
+        String filter = this.getFiltro(columnToFilter);
+        int availableCores = Runtime.getRuntime().availableProcessors();
+        File file = new File(this.archivo);
+        ParallelCSVProcessing p = new ParallelCSVProcessing(file);
+        String filename = file.getName();
+        // Remove the file extension if present
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf('.'));
+        }
+        MedicionTiempo medicion = new MedicionTiempo();
+        medicion.iniciar();
         if (seqOrConcurrent.equals("n")) {
             /*
             this.readDatosSecuencial();
@@ -68,28 +73,14 @@ public class App {
 
             }
              */
-            System.out.println("Nope");
-        } else {
-            // User wants concurrency
-            // medicion.iniciar();
-            String columnToFilter = this.getColumnToFilter();
-            String filter = this.getFiltro(columnToFilter);
 
-            int availableCores = Runtime.getRuntime().availableProcessors();
-            System.out.println("Num of cores: " + availableCores);
-            File file = new File(this.archivo);
-            long fileSizeInBytes = file.length();
-            ParallelCSVProcessing p = new ParallelCSVProcessing(file);
-            int chunkSize = (int) (fileSizeInBytes / availableCores);
-            String filename = file.getName();
-            // Remove the file extension if present
-            if (filename.contains(".")) {
-                filename = filename.substring(0, filename.lastIndexOf('.'));
-            }
+            p.processAll(1, columnToFilter, filter, filename);
+        } else {
             p.processAll(availableCores, columnToFilter, filter, filename);
-            // medicion.detener();
-            // print(tiempo);
         }
+        medicion.detener();
+        double tiempoSegundos = medicion.obtenerTiempoSegundos();
+        System.out.println("Tiempo de ejecución en segundos: " + tiempoSegundos);
     }
 
     private String getCSVPath() {

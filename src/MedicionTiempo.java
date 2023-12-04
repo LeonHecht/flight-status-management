@@ -14,9 +14,9 @@ public class MedicionTiempo {
         return fin - inicio;
     }
 
-    public double obtenerTiempoMinutos() {
+    public double obtenerTiempoSegundos() {
         long tiempoMillis = obtenerTiempoMillis();
-        return tiempoMillis / 60000.0;
+        return tiempoMillis / 1000.0;
     }
 
     /*

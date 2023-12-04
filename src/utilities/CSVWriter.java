@@ -8,57 +8,7 @@ import java.util.List;
 
 public class CSVWriter {
 
-    // Function to write a single CSV string to a file
-    public static void writeCSVToFile(String csvString, String fileName, boolean appendIfExists) {
-        try {
-            String currentDate = new SimpleDateFormat("yyyyMMdd.HHmm").format(new Date());
-            String directoryPath = "Data/resultados";
-            File directory = new File(directoryPath);
-            if (!directory.exists()) {
-                directory.mkdirs(); // Create resultados directory if it doesn't exist
-            }
-
-            String filePath = directoryPath + "/" + fileName + "_filtered(" + currentDate + ").csv";
-            FileOutputStream outputStream = new FileOutputStream(filePath, appendIfExists);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-
-            String[] lines = csvString.split("\\r?\\n"); // Split by newline
-
-            for (String line : lines) {
-                int commaCount = 0;
-                int index = 0;
-
-                // Count commas until the 20th occurrence
-                while (commaCount < 20 && index < line.length()) {
-                    if (line.charAt(index) == ',') {
-                        commaCount++;
-                    }
-                    index++;
-                }
-
-                if (!line.isEmpty()) {
-                    if (line.charAt(0) == 'Q') {
-                        index += 7;
-                    } else {
-                        index += 2;
-                    }
-                }
-
-                // If 20 commas found and the subsequent word is not followed by \n, insert \n
-                if (commaCount == 20 && index < line.length() - 1 && line.charAt(index) != '\n') {
-                    StringBuilder modifiedLine = new StringBuilder(line);
-                    modifiedLine.insert(index + 1, "\n");
-                    line = modifiedLine.toString();
-                }
-
-                writer.write(line + "\n");
-            }
-            writer.close();
-            System.out.println("Successfully created/updated CSV file: " + filePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    private static String columnLine = "Quarter,Month,DayofMonth,DayOfWeek,FlightDate,DOT_ID_Marketing_Airline,OriginAirportID,OriginState,OriginCityName,DestAirportID,DestState,DestCityName,DepTime,DepDelayMinutes,DepDelay,ArrDelay,Cancelled,AirTime,Distance,ArrDel15,DepDel15";
 
 public static synchronized void writeCSVToFileSub(String csvString, String fileName, boolean appendIfExists) {
         try {
@@ -104,14 +54,26 @@ public static synchronized void writeCSVToFileSub(String csvString, String fileN
                 writer.write(line + "\n");
             }
             writer.close();
-            System.out.println("Successfully created/updated CSV file: " + filePath);
+            // System.out.println("Successfully created/updated CSV file: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static void mergeCSVFiles(List<String> fileNames, String outputFileName) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName))) {
+
+        String currentDate = new SimpleDateFormat("yyyyMMdd.HHmm").format(new Date());
+        String directoryPath = "Data/resultados";
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs(); // Create resultados directory if it doesn't exist
+        }
+
+        String filePath = directoryPath + "/" + outputFileName + "_filtered(" + currentDate + ").csv";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+
+            writer.write(columnLine);
             boolean isFirstFile = true;
 
             for (String fileName : fileNames) {
@@ -141,9 +103,9 @@ public static synchronized void writeCSVToFileSub(String csvString, String fileN
                 }
             }
 
-            System.out.println("Merged files successfully into: " + outputFileName);
+            System.out.println("Merged files successfully into: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error writing to file: " + outputFileName);
+            System.err.println("Error writing to file: " + filePath);
             e.printStackTrace();
         }
     }
