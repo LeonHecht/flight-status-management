@@ -14,16 +14,8 @@ public class ParallelCSVProcessing {
 
     public String processPart(String id, long start, long end, String columnToFilter, String filter) throws Exception {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
-            System.out.println("Computing the part from " + start + " to " + end);
+            // System.out.println("Computing the part from " + start + " to " + end);
             randomAccessFile.seek(start);
-
-            /*
-            // Adjust the start position to the beginning of a line
-            while (start > 0 && randomAccessFile.read() != '\n') {
-                start--;
-                randomAccessFile.seek(start);
-            }
-             */
 
             int bufferSize = (int) (end - start);
             byte[] buffer = new byte[bufferSize];
@@ -31,13 +23,10 @@ public class ParallelCSVProcessing {
 
             String chunkData = new String(buffer);
 
-            // List<Object[]> datos = CSVProcessor.convertStringToList(chunkData);
-
             // apply filter
             chunkData = Filter.filtrar(chunkData, columnToFilter, filter);
-            System.out.println("Finished the part from " + start + " to " + end);
+            // System.out.println("Finished the part from " + start + " to " + end);
             CSVWriter.writeCSVToFileSub(chunkData, "subarchivo_" + id, false);
-            // return CSVProcessor.convertToString(chunkData);
             return "";
         }
     }
@@ -77,7 +66,7 @@ public class ParallelCSVProcessing {
         es.invokeAll(tasks);
         es.shutdown();
 
-        CSVWriter.mergeCSVFiles(csvFilenames, "Data/test.csv");
+        CSVWriter.mergeCSVFiles(csvFilenames, fileName);
 
         /*
         for (Future<String> result : results) {

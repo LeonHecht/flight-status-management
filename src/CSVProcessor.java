@@ -9,6 +9,7 @@ public class CSVProcessor {
     public static List<Object[]> convertStringToList(String csvData) {
         List<Object[]> rows = new ArrayList<>();
         String[] lines = csvData.split(System.lineSeparator());
+
         for (String line : lines) {
             String[] columns = line.split(",");
 
